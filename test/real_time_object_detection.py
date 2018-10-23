@@ -36,7 +36,7 @@ def objectChoose(list,flag = 0):
             print("进入选择 ,SVM_prediction:",b)
             time.sleep(2)
             if b == 2.0 :  #握手预备动作；
-                # self.handMovementCtrol(movementType = "setHandNormalizationAngle"  , parameterList = [400,400,400,400,400,400]) 
+                mHandCtrl.handMovementCtrol(movementType = "setHandNormalizationAngle"  , parameterList = [400,400,400,400,400,400]) 
                 print("已通过串口发送指令给假肢手，并对 %s做预备动作" % list[flag])
                 break
             if b == 2.0 : #张手
@@ -58,9 +58,7 @@ def runMyo():
 """
 视频线程
 """
-
-
-def video(mHandCtrl):
+def video():
     # global c
     c = True
     status = 10  # 等待拍照的时间
@@ -161,15 +159,16 @@ def video(mHandCtrl):
         elif status == 0 and c == True:
             c = False
             print("status-if", status)
-            # objectChoose(list)
+            objectChoose(list)
         print("status", status)
         ########################################################################
         # 肌电信号控制抓取物体和松开物体
         if online.SVM_prediction.tolist()[0] == 2.0:#握拳，抓取物体。
-            mHandCtrl.handMovementCtrol(movementType = "setHandNormalizationAngle"  , parameterList = [0,0,0,0,0,0]) 
+            mHandCtrl.handMovementCtrol(movementType = "setHandNormalizationAngle"  , parameterList = [200,200,200,200,200,200]) 
+            # mHandCtrl.handMovementCtrol(movementType = "setHandNormalizationAngle"  , parameterList = [1000,1000,1000,1000,1000,1000]) 
             print("正在给串口发送指令，并抓取物体")
         if online.SVM_prediction.tolist()[0] == 3.0:#张手，松开物体。
-            # self.handMovementCtrol(movementType = "setHandNormalizationAngle"  , parameterList = [1000,1000,1000,1000,1000,1000])  
+            mHandCtrl.handMovementCtrol(movementType = "setHandNormalizationAngle"  , parameterList = [1000,1000,1000,1000,1000,1000])  
             print("正在给串口发送指令，并松开物体")
         ########################################################################
         key = cv2.waitKey(1) & 0xFF
@@ -217,8 +216,10 @@ fps = FPS().start()
 # status = True
 """idx_list = [] #创建空列表 ,也不能放在大循环外面里，不然列表值会不断累积。"""
 
-
+#不能写在循环里，不然多次实例化，会再未关闭串口的情况下尝试打开串口，造成错误；
+mHandCtrl = None #全局变量；
 mHandCtrl = myHandCtrl()
+
 # 线程 threadVideo
 tsk = []
 threadVideo = threading.Thread(target=video)  # 创建线程。
